@@ -10,6 +10,9 @@ Environment variables (set these on your host, never in code)
                                 e.g. https://yourusername.github.io
   ANTHROPIC_MODEL     optional  defaults to claude-sonnet-5-5
   RATE_LIMIT_PER_MIN  optional  requests per visitor per minute (default 5)
+  UPLOADS_ENABLED     optional  "true" turns on POST /claims/{claim_id}/documents
+                                (off by default: the upload route has no login yet)
+  CLAIMPILOT_UPLOAD_DIR optional  where uploaded files are saved (default ./private_uploads)
 """
 
 import logging
@@ -18,7 +21,7 @@ import time
 from collections import defaultdict, deque
 
 import anthropic
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import Depends, FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 from starlette.concurrency import run_in_threadpool
@@ -86,6 +89,22 @@ def check_rate_limit(ip: str) -> None:
             detail="Too many requests. Please wait a minute and try again.",
         )
     window.append(now)
+
+
+def rate_limited(request: Request) -> None:
+    """Dependency form of the rate limiter, for routers."""
+    check_rate_limit(client_ip(request))
+
+
+# ---------------------------------------------------------------- uploads
+# Prototype document uploads. Kept off unless UPLOADS_ENABLED=true, because
+# the route has no authentication yet and anyone could otherwise upload files.
+UPLOADS_ENABLED = os.environ.get("UPLOADS_ENABLED", "false").strip().lower() == "true"
+if UPLOADS_ENABLED:
+    from uploads import router as uploads_router
+
+    app.include_router(uploads_router, dependencies=[Depends(rate_limited)])
+    logger.warning("Document uploads are ENABLED (prototype, no authentication).")
 
 
 # ----------------------------------------------------------------- models
