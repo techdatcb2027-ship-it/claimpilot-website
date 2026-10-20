@@ -137,6 +137,31 @@ input[aria-invalid="true"],textarea[aria-invalid="true"],select[aria-invalid="tr
 .result-foot{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:14px;font-size:12px;color:var(--muted)}
 .disclaimer{font-size:13px;margin-top:14px}
 
+/* Document upload */
+.inline-row{display:flex;gap:8px}
+.inline-row input{flex:1;min-width:0}
+.inline-row .btn{padding:10px 14px;font-size:14px;flex:none}
+.dropzone{border:2px dashed #cfdcde;border-radius:12px;padding:24px 16px;text-align:center;background:var(--soft);cursor:pointer;transition:border-color .15s,background .15s}
+.dropzone:hover,.dropzone.drag{border-color:var(--mint-d);background:var(--ok-bg)}
+.dropzone[aria-invalid="true"]{border-color:var(--err)}
+.dropzone strong{display:block;font-size:15px;margin-bottom:4px}
+.dropzone u{color:var(--mint-d)}
+.dropzone small{color:var(--muted);font-size:12px}
+.selected-files{list-style:none;margin:10px 0 0;padding:0;font-size:13px}
+.selected-files li{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:7px 10px;background:var(--soft);border-radius:8px;margin-bottom:6px}
+.selected-files li span{overflow-wrap:anywhere}
+.remove-file{border:0;background:none;color:var(--muted);font-size:18px;line-height:1;cursor:pointer;padding:0 4px}
+.remove-file:hover{color:var(--err)}
+.file-list{list-style:none;margin:0;padding:0}
+.file-item{display:flex;justify-content:space-between;gap:12px;padding:12px 0;border-bottom:1px solid var(--line);font-size:14px}
+.file-item:last-child{border-bottom:0}
+.file-item .name{font-weight:600;overflow-wrap:anywhere}
+.file-item .sub{color:var(--muted);font-size:12px;overflow-wrap:anywhere}
+.status{font-size:12px;font-weight:700;padding:3px 9px;border-radius:999px;white-space:nowrap;align-self:flex-start}
+.status.ok{background:var(--ok-bg);color:var(--ok)}
+.status.err{background:var(--err-bg);color:#8f2020}
+.status.wait{background:var(--soft);color:var(--muted)}
+
 /* FAQ */
 .faq{max-width:780px}
 details{border-bottom:1px solid var(--line);padding:20px 0}
@@ -183,6 +208,7 @@ footer a{color:var(--mint);text-decoration:none}
       <a href="#how">How it works</a>
       <a href="#outcomes">Outcomes</a>
       <a href="#try">Live demo</a>
+      <a href="#documents">Documents</a>
       <a class="btn btn-primary" href="#demo">Request a demo</a>
     </nav>
   </div>
@@ -352,6 +378,66 @@ footer a{color:var(--mint);text-decoration:none}
   </div>
 </section>
 
+<!-- DOCUMENT UPLOAD -->
+<section id="documents">
+  <div class="container">
+    <div class="section-head">
+      <span class="eyebrow">Supporting documents</span>
+      <h2>Attach photos and reports to a claim.</h2>
+      <p>Upload accident photos, police reports, or repair estimates — JPG, PNG, WebP, or PDF, up to 10&nbsp;MB each. Prototype: use <strong>test files only</strong>.</p>
+    </div>
+
+    <div class="demo-grid">
+      <form class="panel" id="uploadForm" novalidate>
+        <div class="field">
+          <label for="claimId">Claim ID <span class="req" aria-hidden="true">*</span></label>
+          <div class="inline-row">
+            <input id="claimId" name="claim_id" maxlength="64" autocomplete="off" spellcheck="false" aria-describedby="claimIdErr">
+            <button type="button" class="btn btn-outline" id="newClaimIdBtn">New ID</button>
+          </div>
+          <div class="field-meta"><span id="claimIdErr" class="field-error"></span><span>Letters, numbers, - and _</span></div>
+        </div>
+
+        <div class="field">
+          <label for="docCategory">Document type <span class="req" aria-hidden="true">*</span></label>
+          <select id="docCategory" name="category" aria-describedby="docCategoryErr">
+            <option value="">Choose a document type…</option>
+            <option value="accident_photo">Accident photo</option>
+            <option value="police_report">Police report</option>
+            <option value="repair_estimate">Repair estimate</option>
+          </select>
+          <div class="field-meta"><span id="docCategoryErr" class="field-error"></span></div>
+        </div>
+
+        <div class="field">
+          <span id="filesLabel" style="display:block;font-size:14px;font-weight:600;margin-bottom:6px">Files <span class="req" aria-hidden="true">*</span></span>
+          <div class="dropzone" id="dropzone" role="button" tabindex="0" aria-labelledby="filesLabel" aria-describedby="docFilesErr">
+            <strong>Drag files here or <u>browse</u></strong>
+            <small>JPG, PNG, WebP, PDF · max 10 MB each · up to 5 at a time</small>
+          </div>
+          <input type="file" id="docFiles" class="sr-only" multiple tabindex="-1"
+                 accept=".jpg,.jpeg,.png,.webp,.pdf,image/jpeg,image/png,image/webp,application/pdf">
+          <ul class="selected-files" id="selectedFiles"></ul>
+          <div class="field-meta"><span id="docFilesErr" class="field-error" aria-live="polite"></span></div>
+        </div>
+
+        <div class="demo-actions">
+          <button type="submit" class="btn btn-primary" id="uploadBtn"><span class="spinner" aria-hidden="true"></span><span class="label">Upload documents ↑</span></button>
+          <button type="button" class="btn btn-outline" id="clearFilesBtn">Clear</button>
+        </div>
+        <div id="uploadAlert" class="alert" role="alert"></div>
+        <p class="disclaimer">Do not upload real claim documents, IDs, or medical records. Demo use only.</p>
+      </form>
+
+      <div class="panel" aria-live="polite">
+        <div class="cp-head"><h3 style="margin:0">Upload results</h3></div>
+        <div class="result-empty" id="uploadEmpty">Uploaded files will be listed here with their file IDs.</div>
+        <ul class="file-list" id="uploadResults"></ul>
+      </div>
+    </div>
+  </div>
+</section>
+
 <!-- FAQ -->
 <section id="faq">
   <div class="container">
@@ -445,9 +531,12 @@ footer a{color:var(--mint);text-decoration:none}
 /* ============================================================
    CONFIG — edit these two values before publishing
    ============================================================ */
+const IS_LOCAL = ["localhost", "127.0.0.1"].includes(location.hostname);
 const CONFIG = {
-  // Your deployed FastAPI backend (no trailing slash), e.g. "https://firstnotice-api.onrender.com"
-  API_BASE: "https://YOUR-API-HOST",
+  // Opened from your own computer -> talks to the backend on your computer.
+  // Published online -> talks to your deployed backend (no trailing slash),
+  // e.g. "https://firstnotice-api.onrender.com"
+  API_BASE: IS_LOCAL ? "http://localhost:8000" : "https://YOUR-API-HOST",
   // Where demo requests should go
   CONTACT_EMAIL: "you@yourcompany.com",
   REQUEST_TIMEOUT_MS: 45000,
@@ -658,6 +747,214 @@ const CONFIG = {
   });
 
   updateCounter();
+
+  /* ============================================================
+     DOCUMENT UPLOAD — validation + POST /claims/{id}/documents
+     ============================================================ */
+  const UP = {
+    MAX_BYTES: 10 * 1024 * 1024,
+    MAX_FILES: 5,
+    TIMEOUT_MS: 60000,
+    TYPES: {
+      "image/jpeg": [".jpg", ".jpeg"],
+      "image/png": [".png"],
+      "image/webp": [".webp"],
+      "application/pdf": [".pdf"]
+    },
+    LABELS: { accident_photo: "Accident photo", police_report: "Police report", repair_estimate: "Repair estimate" }
+  };
+  const upForm = $("uploadForm"), claimIdEl = $("claimId"), claimIdErr = $("claimIdErr"),
+        catEl = $("docCategory"), catErr = $("docCategoryErr"), fileInput = $("docFiles"),
+        dropzone = $("dropzone"), filesErr = $("docFilesErr"), selectedList = $("selectedFiles"),
+        upBtn = $("uploadBtn"), upAlert = $("uploadAlert"), upResults = $("uploadResults"),
+        upEmpty = $("uploadEmpty");
+  let selected = [];
+  let uploading = false;
+
+  function makeClaimId() {
+    const d = new Date();
+    const ymd = d.getFullYear() + String(d.getMonth() + 1).padStart(2, "0") + String(d.getDate()).padStart(2, "0");
+    const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+    const rnd = new Uint8Array(6);
+    crypto.getRandomValues(rnd);
+    return "CLM-" + ymd + "-" + Array.from(rnd, (b) => chars[b % chars.length]).join("");
+  }
+  claimIdEl.value = makeClaimId();
+  $("newClaimIdBtn").addEventListener("click", () => {
+    claimIdEl.value = makeClaimId(); setFieldError(claimIdEl, claimIdErr, "");
+  });
+
+  function validateClaimId() {
+    const v = claimIdEl.value.trim();
+    if (!v) return setFieldError(claimIdEl, claimIdErr, "Claim ID is required.");
+    if (v.length > 64) return setFieldError(claimIdEl, claimIdErr, "Keep it to 64 characters or fewer.");
+    if (!/^[A-Za-z0-9_-]+$/.test(v)) return setFieldError(claimIdEl, claimIdErr, "Use only letters, numbers, - and _.");
+    return setFieldError(claimIdEl, claimIdErr, "");
+  }
+  function validateCategory() {
+    return setFieldError(catEl, catErr, UP.LABELS[catEl.value] ? "" : "Choose a document type.");
+  }
+  claimIdEl.addEventListener("input", () => { if (claimIdEl.getAttribute("aria-invalid") === "true") validateClaimId(); });
+  catEl.addEventListener("change", validateCategory);
+
+  const fmtSize = (b) => b >= 1048576 ? (b / 1048576).toFixed(1) + " MB" : Math.max(1, Math.round(b / 1024)) + " KB";
+  const extOf = (name) => { const i = name.lastIndexOf("."); return i >= 0 ? name.slice(i).toLowerCase() : ""; };
+
+  // Same "magic number" checks the server does, so bad files fail fast
+  async function signatureOk(file) {
+    const h = new Uint8Array(await file.slice(0, 16).arrayBuffer());
+    const starts = (...bytes) => bytes.every((b, i) => h[i] === b);
+    switch (file.type) {
+      case "image/jpeg": return starts(0xff, 0xd8, 0xff);
+      case "image/png": return starts(0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a);
+      case "image/webp": return starts(0x52, 0x49, 0x46, 0x46) && h[8] === 0x57 && h[9] === 0x45 && h[10] === 0x42 && h[11] === 0x50;
+      case "application/pdf": return starts(0x25, 0x50, 0x44, 0x46, 0x2d);
+      default: return false;
+    }
+  }
+  async function checkFile(file) {
+    const exts = UP.TYPES[file.type];
+    if (!exts || !exts.includes(extOf(file.name))) return "not a JPG, PNG, WebP, or PDF";
+    if (file.size === 0) return "file is empty";
+    if (file.size > UP.MAX_BYTES) return "larger than 10 MB";
+    try { if (!(await signatureOk(file))) return "contents don't match its file type"; }
+    catch (_) { return "couldn't be read"; }
+    return "";
+  }
+
+  function renderSelected() {
+    selectedList.innerHTML = "";
+    selected.forEach((f, i) => {
+      const li = document.createElement("li");
+      const span = document.createElement("span");
+      span.textContent = `${f.name} · ${fmtSize(f.size)}`;
+      const rm = document.createElement("button");
+      rm.type = "button"; rm.className = "remove-file"; rm.textContent = "×";
+      rm.setAttribute("aria-label", "Remove " + f.name);
+      rm.addEventListener("click", () => { selected.splice(i, 1); renderSelected(); });
+      li.append(span, rm);
+      selectedList.appendChild(li);
+    });
+    if (selected.length) { dropzone.removeAttribute("aria-invalid"); }
+  }
+
+  async function addFiles(list) {
+    if (uploading) return;
+    const problems = [];
+    for (const file of Array.from(list)) {
+      if (selected.some((f) => f.name === file.name && f.size === file.size)) continue;
+      if (selected.length >= UP.MAX_FILES) { problems.push(`Only ${UP.MAX_FILES} files at a time — ${file.name} was skipped.`); continue; }
+      const why = await checkFile(file);
+      if (why) problems.push(`${file.name}: ${why}.`); else selected.push(file);
+    }
+    filesErr.textContent = problems.join(" ");
+    renderSelected();
+  }
+
+  dropzone.addEventListener("click", () => fileInput.click());
+  dropzone.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" || e.key === " ") { e.preventDefault(); fileInput.click(); }
+  });
+  fileInput.addEventListener("change", async () => { await addFiles(fileInput.files); fileInput.value = ""; });
+  ["dragenter", "dragover"].forEach((t) => dropzone.addEventListener(t, (e) => { e.preventDefault(); dropzone.classList.add("drag"); }));
+  ["dragleave", "drop"].forEach((t) => dropzone.addEventListener(t, (e) => { e.preventDefault(); dropzone.classList.remove("drag"); }));
+  dropzone.addEventListener("drop", (e) => { if (e.dataTransfer) addFiles(e.dataTransfer.files); });
+
+  $("clearFilesBtn").addEventListener("click", () => {
+    if (uploading) return;
+    selected = []; renderSelected(); filesErr.textContent = ""; hideAlert(upAlert);
+  });
+
+  function addResultRow(file) {
+    upEmpty.style.display = "none";
+    const li = document.createElement("li");
+    li.className = "file-item";
+    const info = document.createElement("div");
+    const name = document.createElement("div"); name.className = "name"; name.textContent = file.name;
+    const sub = document.createElement("div"); sub.className = "sub"; sub.textContent = fmtSize(file.size);
+    info.append(name, sub);
+    const badge = document.createElement("span"); badge.className = "status wait"; badge.textContent = "Waiting";
+    li.append(info, badge);
+    upResults.prepend(li);
+    return {
+      set(state, label, detail) {
+        badge.className = "status " + state; badge.textContent = label;
+        if (detail) sub.textContent = detail;
+      }
+    };
+  }
+
+  function setUploading(on) {
+    uploading = on;
+    upBtn.disabled = on;
+    upBtn.classList.toggle("loading", on);
+    upBtn.querySelector(".label").textContent = on ? "Uploading…" : "Upload documents ↑";
+    [claimIdEl, catEl, $("newClaimIdBtn"), $("clearFilesBtn")].forEach((el) => (el.disabled = on));
+  }
+
+  async function uploadOne(claimId, category, file) {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), UP.TIMEOUT_MS);
+    const body = new FormData();
+    body.append("category", category);
+    body.append("file", file, file.name);
+    try {
+      const res = await fetch(`${CONFIG.API_BASE.replace(/\/+$/, "")}/claims/${encodeURIComponent(claimId)}/documents`, {
+        method: "POST", body, signal: controller.signal
+      });
+      let data = null;
+      try { data = await res.json(); } catch (_) { /* non-JSON */ }
+      if (res.ok && data && data.file_id) return { ok: true, data };
+      if (res.status === 404 && !(data && typeof data.detail === "string" && data.detail !== "Not Found"))
+        return { ok: false, status: 404, msg: "Upload service not found — uploads may be turned off on the server (UPLOADS_ENABLED)." };
+      return { ok: false, status: res.status, msg: res.ok ? "Unexpected response from the server." : messageFromError(res.status, data) };
+    } catch (err) {
+      if (err && err.name === "AbortError") return { ok: false, status: 0, msg: "Upload timed out. Try again." };
+      return { ok: false, status: 0, msg: navigator.onLine ? "Couldn't reach the server — is the backend running?" : "You appear to be offline." };
+    } finally {
+      clearTimeout(timer);
+    }
+  }
+
+  upForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    if (uploading) return;
+    hideAlert(upAlert);
+    const okId = validateClaimId(), okCat = validateCategory();
+    if (!selected.length) { dropzone.setAttribute("aria-invalid", "true"); filesErr.textContent = "Choose at least one file."; }
+    if (!okId) { claimIdEl.focus(); return; }
+    if (!okCat) { catEl.focus(); return; }
+    if (!selected.length) { dropzone.focus(); return; }
+    if (!apiConfigured()) {
+      showAlert(upAlert, "info", "Uploads aren't connected yet. Set API_BASE in index.html to your deployed backend URL.");
+      return;
+    }
+
+    const claimId = claimIdEl.value.trim(), category = catEl.value;
+    const queue = selected.slice();
+    const rows = queue.map(addResultRow);
+    let done = 0, stopped = false;
+    setUploading(true);
+    for (let i = 0; i < queue.length; i++) {
+      if (stopped) { rows[i].set("err", "Skipped", "Not sent — try again in a minute."); continue; }
+      rows[i].set("wait", "Uploading…");
+      const r = await uploadOne(claimId, category, queue[i]);
+      if (r.ok) {
+        done++;
+        selected = selected.filter((f) => f !== queue[i]);
+        rows[i].set("ok", "Uploaded", `${UP.LABELS[category]} · ${fmtSize(r.data.size_bytes)} · claim ${r.data.claim_id} · ID ${r.data.file_id.slice(0, 8)}…`);
+      } else {
+        rows[i].set("err", "Failed", r.msg);
+        if (r.status === 429 || r.status === 404 || r.status === 0) stopped = true; // no point retrying the rest now
+      }
+    }
+    setUploading(false);
+    renderSelected();
+    const total = queue.length;
+    if (done === total) showAlert(upAlert, "success", `${done} of ${total} uploaded to claim ${claimId}.`);
+    else if (done) showAlert(upAlert, "error", `${done} of ${total} uploaded. See the results for what failed.`);
+    else showAlert(upAlert, "error", "Nothing was uploaded. See the results for details.");
+  });
 
   /* ============================================================
      DEMO REQUEST FORM — validation + Gmail / mailto / copy
