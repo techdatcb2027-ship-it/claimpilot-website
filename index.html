@@ -1,0 +1,1060 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="FirstNotice turns unstructured insurance claim intake into clear, structured claim information for carrier teams.">
+<meta name="theme-color" content="#07171d">
+<title>FirstNotice | AI-assisted claims intake</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#07171d; --ink-2:#0c2229; --ink-3:#123039;
+  --mint:#5ce1b9; --mint-d:#1f9f7c;
+  --text:#14262c; --muted:#5d7178; --line:#e1e9ea; --soft:#f3f7f7;
+  --on-dark:#e9f3f2; --on-dark-muted:#9fb6b8;
+  --err:#d64545; --err-bg:#fdecec; --ok:#147a5d; --ok-bg:#e5f6ef; --warn-bg:#fff6e0;
+  --radius:16px; --shadow:0 24px 60px rgba(4,20,26,.28);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif;color:var(--text);background:#fff;line-height:1.6;-webkit-font-smoothing:antialiased}
+.container{width:min(1120px,100% - 32px);margin-inline:auto}
+a{color:inherit}
+h1,h2,h3{line-height:1.15;margin:0 0 14px;letter-spacing:-.02em}
+p{margin:0 0 14px;color:var(--muted)}
+.eyebrow{display:inline-block;font-size:12px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--mint-d);margin-bottom:14px}
+.dark .eyebrow{color:var(--mint)}
+.mono{font-family:"JetBrains Mono",ui-monospace,monospace;font-size:12px}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+/* Buttons */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:0;border-radius:10px;padding:13px 20px;font:600 15px/1 Inter,sans-serif;text-decoration:none;cursor:pointer;transition:transform .15s,background .15s,opacity .15s}
+.btn:hover{transform:translateY(-1px)}
+.btn:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible,a:focus-visible,summary:focus-visible{outline:3px solid var(--mint);outline-offset:2px}
+.btn-primary{background:var(--mint);color:var(--ink)}
+.btn-primary:hover{background:#79ecc9}
+.btn-ghost{background:transparent;color:var(--on-dark);border:1px solid rgba(255,255,255,.22)}
+.btn-ghost:hover{background:rgba(255,255,255,.06)}
+.btn-outline{background:#fff;color:var(--text);border:1px solid var(--line)}
+.btn[disabled]{opacity:.6;cursor:not-allowed;transform:none}
+.spinner{width:16px;height:16px;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;animation:spin .7s linear infinite;display:none}
+.btn.loading .spinner{display:inline-block}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* Nav */
+header{position:sticky;top:0;z-index:20;background:rgba(7,23,29,.92);backdrop-filter:blur(10px);border-bottom:1px solid rgba(255,255,255,.06)}
+.nav{display:flex;align-items:center;justify-content:space-between;gap:16px;height:68px}
+.logo{display:flex;align-items:center;gap:10px;color:#fff;text-decoration:none;font-weight:800;font-size:19px;letter-spacing:-.02em}
+.logo-mark{width:28px;height:28px;border-radius:8px;background:linear-gradient(135deg,var(--mint),#2bb894);display:grid;place-items:center;color:var(--ink);font-size:15px}
+.nav-links{display:flex;align-items:center;gap:26px}
+.nav-links a:not(.btn){color:var(--on-dark-muted);text-decoration:none;font-size:14px;font-weight:500}
+.nav-links a:not(.btn):hover{color:#fff}
+.nav .btn{padding:10px 16px;font-size:14px}
+
+/* Hero */
+.dark{background:var(--ink);color:var(--on-dark)}
+.dark p{color:var(--on-dark-muted)}
+.hero{position:relative;overflow:hidden;padding:88px 0 96px;background:radial-gradient(800px 420px at 85% 10%,rgba(92,225,185,.16),transparent 60%),radial-gradient(600px 400px at 0% 100%,rgba(31,159,124,.12),transparent 60%),var(--ink)}
+.hero-grid{display:grid;grid-template-columns:1.05fr .95fr;gap:56px;align-items:center}
+.hero h1{font-size:clamp(38px,5.6vw,62px);font-weight:800;color:#fff}
+.hero h1 em{font-style:normal;color:var(--mint)}
+.hero .lead{font-size:18px;max-width:540px;margin-bottom:28px}
+.hero-actions{display:flex;flex-wrap:wrap;gap:12px;margin-bottom:22px}
+.hero-note{font-size:13px;color:var(--on-dark-muted)}
+.card-preview{background:#fff;color:var(--text);border-radius:20px;padding:22px;box-shadow:var(--shadow)}
+.cp-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+.cp-head .mono{color:var(--muted)}
+.pill{display:inline-flex;align-items:center;gap:6px;background:var(--ok-bg);color:var(--ok);font-size:12px;font-weight:700;padding:5px 10px;border-radius:999px}
+.pill::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor}
+.cp-desc{background:var(--soft);border-radius:12px;padding:14px;font-size:14px;margin-bottom:12px}
+.cp-desc small{display:block;font-weight:700;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
+.cp-row{display:flex;justify-content:space-between;gap:16px;padding:11px 2px;border-bottom:1px solid var(--line);font-size:14px}
+.cp-row span{color:var(--muted)}
+.cp-row strong{text-align:right}
+.cp-foot{display:flex;justify-content:space-between;align-items:center;margin-top:14px;font-size:13px;color:var(--muted)}
+.cp-foot .mono{background:var(--ink);color:var(--mint);padding:5px 9px;border-radius:6px}
+
+/* Sections */
+section{padding:92px 0}
+.section-head{max-width:700px;margin-bottom:44px}
+.section-head h2{font-size:clamp(30px,4vw,44px);font-weight:800}
+.section-head p{font-size:17px}
+.soft{background:var(--soft)}
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+.step,.benefit{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:26px}
+.step .mono{color:var(--mint-d);font-weight:500;display:block;margin-bottom:16px}
+.step h3,.benefit h3{font-size:19px}
+.step p,.benefit p{font-size:15px;margin:0}
+.benefit .ico{width:40px;height:40px;border-radius:10px;background:var(--ok-bg);color:var(--ok);display:grid;place-items:center;font-size:18px;margin-bottom:16px}
+
+/* Principles */
+.principles-grid{display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:center}
+.principle{display:flex;gap:14px;padding:16px 0;border-bottom:1px solid rgba(255,255,255,.08)}
+.principle:last-child{border-bottom:0}
+.principle .check{flex:none;width:26px;height:26px;border-radius:50%;background:rgba(92,225,185,.14);color:var(--mint);display:grid;place-items:center;font-size:13px;margin-top:2px}
+.principle strong{color:#fff;display:block}
+.principle p{margin:0;font-size:15px}
+.handoff{background:var(--ink-2);border:1px solid rgba(255,255,255,.08);border-radius:20px;padding:24px}
+.handoff h3{color:#fff;font-size:17px;margin-bottom:16px}
+.ho-row{display:grid;grid-template-columns:1fr auto auto;gap:14px;align-items:center;padding:13px 0;border-bottom:1px solid rgba(255,255,255,.07);font-size:14px}
+.ho-row:last-child{border-bottom:0}
+.ho-row span{color:var(--on-dark-muted)}
+.ho-row strong{color:#fff}
+.ho-tag{font-size:11px;font-weight:700;color:var(--mint);background:rgba(92,225,185,.1);padding:4px 8px;border-radius:6px}
+
+/* Live demo */
+.demo-grid{display:grid;grid-template-columns:1fr 1fr;gap:22px;align-items:start}
+.panel{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:24px;min-width:0}
+.panel h3{font-size:18px}
+label{display:block;font-size:14px;font-weight:600;margin-bottom:6px}
+.req{color:var(--err)}
+input,textarea,select{width:100%;font:15px/1.5 Inter,sans-serif;color:var(--text);background:#fff;border:1px solid #cfdcde;border-radius:10px;padding:12px 14px;transition:border-color .15s,box-shadow .15s}
+textarea{min-height:170px;resize:vertical}
+input[aria-invalid="true"],textarea[aria-invalid="true"],select[aria-invalid="true"]{border-color:var(--err);box-shadow:0 0 0 3px rgba(214,69,69,.12)}
+.field{margin-bottom:16px}
+.field-meta{display:flex;justify-content:space-between;gap:10px;margin-top:6px;font-size:12px;color:var(--muted);min-height:18px}
+.field-error{color:var(--err);font-weight:600}
+.counter.over{color:var(--err);font-weight:700}
+.samples{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px}
+.chip{border:1px solid var(--line);background:var(--soft);border-radius:999px;padding:6px 12px;font:500 13px Inter,sans-serif;cursor:pointer;color:var(--text)}
+.chip:hover{border-color:var(--mint-d)}
+.demo-actions{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.alert{display:none;border-radius:10px;padding:12px 14px;font-size:14px;margin-top:16px}
+.alert.show{display:block}
+.alert.error{background:var(--err-bg);color:#8f2020;border:1px solid #f5c6c6}
+.alert.success{background:var(--ok-bg);color:var(--ok);border:1px solid #bfe8d8}
+.alert.info{background:var(--warn-bg);color:#7a5a00;border:1px solid #f1dfa6}
+.result-empty{color:var(--muted);font-size:15px;border:1px dashed var(--line);border-radius:12px;padding:28px;text-align:center}
+.result-body{display:none;white-space:pre-wrap;overflow-wrap:anywhere;font-size:15px;line-height:1.65;background:var(--soft);border-radius:12px;padding:16px;max-height:460px;overflow:auto}
+.result-body.show{display:block}
+.skeleton{display:none}
+.skeleton.show{display:block}
+.skeleton div{height:12px;border-radius:6px;background:linear-gradient(90deg,#edf2f2,#f8fbfb,#edf2f2);background-size:200% 100%;animation:shimmer 1.2s infinite;margin-bottom:12px}
+@keyframes shimmer{to{background-position:-200% 0}}
+.result-foot{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:14px;font-size:12px;color:var(--muted)}
+.disclaimer{font-size:13px;margin-top:14px}
+
+/* Document upload */
+.inline-row{display:flex;gap:8px}
+.inline-row input{flex:1;min-width:0}
+.inline-row .btn{padding:10px 14px;font-size:14px;flex:none}
+.dropzone{border:2px dashed #cfdcde;border-radius:12px;padding:24px 16px;text-align:center;background:var(--soft);cursor:pointer;transition:border-color .15s,background .15s}
+.dropzone:hover,.dropzone.drag{border-color:var(--mint-d);background:var(--ok-bg)}
+.dropzone[aria-invalid="true"]{border-color:var(--err)}
+.dropzone strong{display:block;font-size:15px;margin-bottom:4px}
+.dropzone u{color:var(--mint-d)}
+.dropzone small{color:var(--muted);font-size:12px}
+.selected-files{list-style:none;margin:10px 0 0;padding:0;font-size:13px}
+.selected-files li{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:7px 10px;background:var(--soft);border-radius:8px;margin-bottom:6px}
+.selected-files li span{overflow-wrap:anywhere}
+.remove-file{border:0;background:none;color:var(--muted);font-size:18px;line-height:1;cursor:pointer;padding:0 4px}
+.remove-file:hover{color:var(--err)}
+.file-list{list-style:none;margin:0;padding:0}
+.file-item{display:flex;justify-content:space-between;gap:12px;padding:12px 0;border-bottom:1px solid var(--line);font-size:14px}
+.file-item:last-child{border-bottom:0}
+.file-item .name{font-weight:600;overflow-wrap:anywhere}
+.file-item .sub{color:var(--muted);font-size:12px;overflow-wrap:anywhere}
+.status{font-size:12px;font-weight:700;padding:3px 9px;border-radius:999px;white-space:nowrap;align-self:flex-start}
+.status.ok{background:var(--ok-bg);color:var(--ok)}
+.status.err{background:var(--err-bg);color:#8f2020}
+.status.wait{background:var(--soft);color:var(--muted)}
+
+/* FAQ */
+.faq{max-width:780px}
+details{border-bottom:1px solid var(--line);padding:20px 0}
+summary{cursor:pointer;font-weight:700;font-size:17px;list-style:none;display:flex;justify-content:space-between;gap:16px}
+summary::-webkit-details-marker{display:none}
+summary::after{content:"+";color:var(--mint-d);font-size:22px;line-height:1}
+details[open] summary::after{content:"–"}
+details p{margin:12px 0 0}
+
+/* Contact */
+.contact-grid{display:grid;grid-template-columns:.9fr 1.1fr;gap:48px;align-items:start}
+.contact h2{color:#fff;font-size:clamp(30px,4vw,42px);font-weight:800}
+.contact-email{display:inline-block;color:var(--mint);font-weight:700;margin-bottom:22px;word-break:break-all}
+.contact form{background:#fff;color:var(--text);border-radius:20px;padding:26px;box-shadow:var(--shadow)}
+.row-2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.form-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:4px}
+.hp{position:absolute;left:-9999px}
+
+footer{background:#041015;color:var(--on-dark-muted);padding:28px 0;font-size:13px}
+.foot{display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px}
+footer a{color:var(--mint);text-decoration:none}
+
+@media (max-width:900px){
+  .hero-grid,.principles-grid,.demo-grid,.contact-grid{grid-template-columns:1fr}
+  .grid-3{grid-template-columns:1fr}
+  .nav-links a:not(.btn){display:none}
+  section{padding:68px 0}
+  .hero{padding:56px 0 68px}
+}
+@media (max-width:520px){
+  .row-2{grid-template-columns:1fr}
+  .ho-row{grid-template-columns:1fr auto}
+  .ho-tag{display:none}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="container nav">
+    <a class="logo" href="#top" aria-label="FirstNotice home"><span class="logo-mark" aria-hidden="true">✓</span>FirstNotice</a>
+    <nav class="nav-links" aria-label="Main">
+      <a href="#how">How it works</a>
+      <a href="#outcomes">Outcomes</a>
+      <a href="#try">Live demo</a>
+      <a href="#documents">Documents</a>
+      <a class="btn btn-primary" href="#demo">Request a demo</a>
+    </nav>
+  </div>
+</header>
+
+<main id="top">
+
+<!-- HERO -->
+<section class="hero dark">
+  <div class="container hero-grid">
+    <div>
+      <span class="eyebrow">AI-assisted claims intake</span>
+      <h1>Make first notice useful <em>from the first minute.</em></h1>
+      <p class="lead">FirstNotice turns an unstructured claim description into clear, structured information—so carrier teams can understand, review, and route new claims with less manual sorting.</p>
+      <div class="hero-actions">
+        <a class="btn btn-primary" href="#demo">Request a demo</a>
+        <a class="btn btn-ghost" href="#how">See how it works</a>
+      </div>
+      <p class="hero-note">Built for the first mile of the claims workflow.</p>
+    </div>
+
+    <div class="card-preview" aria-label="Example structured claim">
+      <div class="cp-head">
+        <span class="mono">NEW CLAIM INTAKE</span>
+        <span class="pill">Structured</span>
+      </div>
+      <div class="cp-desc">
+        <small>Incoming description</small>
+        A driver reported rear-end damage after being struck while stopped at an intersection. No injuries reported.
+      </div>
+      <div class="cp-row"><span>Claim type</span><strong>Auto — collision</strong></div>
+      <div class="cp-row"><span>Injury status</span><strong>None reported</strong></div>
+      <div class="cp-row"><span>Summary</span><strong>Rear-end incident involving a stationary vehicle; reported property damage only.</strong></div>
+      <div class="cp-foot"><span>Ready for team review</span><span class="mono">INTAKE → STRUCTURE</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section id="how">
+  <div class="container">
+    <div class="section-head">
+      <span class="eyebrow">One clear path</span>
+      <h2>From intake narrative to an organized claim.</h2>
+      <p>FirstNotice adds a focused AI step between receiving a claim and sending it into the next stage of your workflow.</p>
+    </div>
+    <div class="grid-3">
+      <article class="step">
+        <span class="mono">01 / RECEIVE</span>
+        <h3>Capture the claim description</h3>
+        <p>Start with the information provided during first notice—before someone has to manually organize it.</p>
+      </article>
+      <article class="step">
+        <span class="mono">02 / UNDERSTAND</span>
+        <h3>Classify and extract</h3>
+        <p>AI identifies the claim type, pulls out key details, and creates a concise summary for review.</p>
+      </article>
+      <article class="step">
+        <span class="mono">03 / HAND OFF</span>
+        <h3>Return structured results</h3>
+        <p>Your team receives consistent information that is easier to review and move to the right next step.</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- OUTCOMES -->
+<section id="outcomes" class="soft">
+  <div class="container">
+    <div class="section-head">
+      <span class="eyebrow">A cleaner first mile</span>
+      <h2>Give adjusters better information to start with.</h2>
+      <p>The goal is simple: reduce the friction between a claimant's words and the organized information a carrier team needs.</p>
+    </div>
+    <div class="grid-3">
+      <article class="benefit">
+        <div class="ico" aria-hidden="true">≡</div>
+        <h3>More consistent intake</h3>
+        <p>Turn free-form descriptions into the same useful set of fields, regardless of how the claim was written.</p>
+      </article>
+      <article class="benefit">
+        <div class="ico" aria-hidden="true">⚡</div>
+        <h3>Faster initial review</h3>
+        <p>Surface the claim type, reported details, and a short summary without making the reviewer hunt through a narrative.</p>
+      </article>
+      <article class="benefit">
+        <div class="ico" aria-hidden="true">→</div>
+        <h3>Clearer handoffs</h3>
+        <p>Prepare claim information in a structured form that supports consistent routing and team review.</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- PRINCIPLES -->
+<section class="dark">
+  <div class="container principles-grid">
+    <div>
+      <span class="eyebrow">Focused by design</span>
+      <h2 style="color:#fff;font-size:clamp(28px,3.6vw,40px);font-weight:800">A practical AI layer—not a replacement for claims judgment.</h2>
+      <p>FirstNotice is designed to organize intake, while your team remains in control of review, decisions, and the rest of the claim lifecycle.</p>
+      <div class="principle"><span class="check">✓</span><div><strong>Human review stays central</strong><p>Structured output supports your team; it does not make claim decisions.</p></div></div>
+      <div class="principle"><span class="check">✓</span><div><strong>Start with one workflow</strong><p>Prove value at intake before expanding into deeper claims operations.</p></div></div>
+      <div class="principle"><span class="check">✓</span><div><strong>Built for operational clarity</strong><p>Keep the output concise, structured, and ready for the next person in line.</p></div></div>
+    </div>
+    <div class="handoff">
+      <h3>Example structured handoff</h3>
+      <div class="ho-row"><span>Line of business</span><strong>Personal auto</strong><span class="ho-tag">Captured</span></div>
+      <div class="ho-row"><span>Loss type</span><strong>Collision</strong><span class="ho-tag">Classified</span></div>
+      <div class="ho-row"><span>Reported injury</span><strong>No</strong><span class="ho-tag">Extracted</span></div>
+      <div class="ho-row"><span>Next step</span><strong>Team review</strong><span class="ho-tag">Ready</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- LIVE DEMO -->
+<section id="try" class="soft">
+  <div class="container">
+    <div class="section-head">
+      <span class="eyebrow">Live demo</span>
+      <h2>Try structured intake on a sample claim.</h2>
+      <p>Enter a <strong>fictional</strong> claim description. It is sent to the FirstNotice API, organized by AI, and returned for human review.</p>
+    </div>
+
+    <div class="demo-grid">
+      <form class="panel" id="intakeForm" novalidate>
+        <div class="samples" aria-label="Sample claims">
+          <button type="button" class="chip" data-sample="A driver reported rear-end damage after being struck while stopped at an intersection. No injuries reported. The other driver exchanged insurance information at the scene.">Auto collision</button>
+          <button type="button" class="chip" data-sample="Homeowner reports a burst pipe under the kitchen sink overnight. Water spread into the hallway and damaged the flooring and lower cabinets. No one was hurt.">Water damage</button>
+          <button type="button" class="chip" data-sample="Warehouse employee slipped on a wet floor near the loading dock and says their wrist is painful and swollen. They were taken to urgent care the same day.">Workplace injury</button>
+        </div>
+
+        <div class="field">
+          <label for="claimText">Claim description <span class="req" aria-hidden="true">*</span></label>
+          <textarea id="claimText" name="description" maxlength="10000" aria-describedby="claimError claimCount" placeholder="Describe what happened, when, what was damaged, and whether anyone was hurt…"></textarea>
+          <div class="field-meta">
+            <span id="claimError" class="field-error" aria-live="polite"></span>
+            <span id="claimCount" class="counter">0 / 10,000</span>
+          </div>
+        </div>
+
+        <div class="demo-actions">
+          <button type="submit" class="btn btn-primary" id="analyzeBtn"><span class="spinner" aria-hidden="true"></span><span class="label">Structure this claim →</span></button>
+          <button type="button" class="btn btn-outline" id="clearBtn">Clear</button>
+        </div>
+
+        <div id="demoAlert" class="alert" role="alert"></div>
+        <p class="disclaimer">Do not enter real names, policy numbers, or medical details. Demo use only.</p>
+      </form>
+
+      <div class="panel" aria-live="polite" aria-busy="false" id="resultPanel">
+        <div class="cp-head">
+          <h3 style="margin:0">Structured result</h3>
+          <span class="pill" id="resultPill" style="display:none">Ready for review</span>
+        </div>
+        <div class="result-empty" id="resultEmpty">Your structured claim summary will appear here.</div>
+        <div class="skeleton" id="resultSkeleton" aria-hidden="true">
+          <div style="width:40%"></div><div style="width:90%"></div><div style="width:75%"></div><div style="width:85%"></div><div style="width:55%"></div>
+        </div>
+        <div class="result-body" id="resultBody"></div>
+        <div class="result-foot" id="resultFoot" style="display:none">
+          <span id="resultMeta"></span>
+          <button type="button" class="btn btn-outline" id="copyResultBtn" style="padding:8px 12px;font-size:13px">Copy</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- DOCUMENT UPLOAD -->
+<section id="documents">
+  <div class="container">
+    <div class="section-head">
+      <span class="eyebrow">Supporting documents</span>
+      <h2>Attach photos and reports to a claim.</h2>
+      <p>Upload accident photos, police reports, or repair estimates — JPG, PNG, WebP, or PDF, up to 10&nbsp;MB each. Prototype: use <strong>test files only</strong>.</p>
+    </div>
+
+    <div class="demo-grid">
+      <form class="panel" id="uploadForm" novalidate>
+        <div class="field">
+          <label for="claimId">Claim ID <span class="req" aria-hidden="true">*</span></label>
+          <div class="inline-row">
+            <input id="claimId" name="claim_id" maxlength="64" autocomplete="off" spellcheck="false" aria-describedby="claimIdErr">
+            <button type="button" class="btn btn-outline" id="newClaimIdBtn">New ID</button>
+          </div>
+          <div class="field-meta"><span id="claimIdErr" class="field-error"></span><span>Letters, numbers, - and _</span></div>
+        </div>
+
+        <div class="field">
+          <label for="docCategory">Document type <span class="req" aria-hidden="true">*</span></label>
+          <select id="docCategory" name="category" aria-describedby="docCategoryErr">
+            <option value="">Choose a document type…</option>
+            <option value="accident_photo">Accident photo</option>
+            <option value="police_report">Police report</option>
+            <option value="repair_estimate">Repair estimate</option>
+          </select>
+          <div class="field-meta"><span id="docCategoryErr" class="field-error"></span></div>
+        </div>
+
+        <div class="field">
+          <span id="filesLabel" style="display:block;font-size:14px;font-weight:600;margin-bottom:6px">Files <span class="req" aria-hidden="true">*</span></span>
+          <div class="dropzone" id="dropzone" role="button" tabindex="0" aria-labelledby="filesLabel" aria-describedby="docFilesErr">
+            <strong>Drag files here or <u>browse</u></strong>
+            <small>JPG, PNG, WebP, PDF · max 10 MB each · up to 5 at a time</small>
+          </div>
+          <input type="file" id="docFiles" class="sr-only" multiple tabindex="-1"
+                 accept=".jpg,.jpeg,.png,.webp,.pdf,image/jpeg,image/png,image/webp,application/pdf">
+          <ul class="selected-files" id="selectedFiles"></ul>
+          <div class="field-meta"><span id="docFilesErr" class="field-error" aria-live="polite"></span></div>
+        </div>
+
+        <div class="demo-actions">
+          <button type="submit" class="btn btn-primary" id="uploadBtn"><span class="spinner" aria-hidden="true"></span><span class="label">Upload documents ↑</span></button>
+          <button type="button" class="btn btn-outline" id="clearFilesBtn">Clear</button>
+        </div>
+        <div id="uploadAlert" class="alert" role="alert"></div>
+        <p class="disclaimer">Do not upload real claim documents, IDs, or medical records. Demo use only.</p>
+      </form>
+
+      <div class="panel" aria-live="polite">
+        <div class="cp-head"><h3 style="margin:0">Upload results</h3></div>
+        <div class="result-empty" id="uploadEmpty">Uploaded files will be listed here with their file IDs.</div>
+        <ul class="file-list" id="uploadResults"></ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section id="faq">
+  <div class="container">
+    <div class="section-head">
+      <span class="eyebrow">Questions</span>
+      <h2>A straightforward place to begin.</h2>
+    </div>
+    <div class="faq">
+      <details>
+        <summary>What does FirstNotice do?</summary>
+        <p>It takes a claim description, identifies the type of claim, extracts key reported details, and returns a concise structured summary for a carrier team's review.</p>
+      </details>
+      <details>
+        <summary>Does it make claim decisions?</summary>
+        <p>No. FirstNotice is designed to support intake organization. Claim review, coverage decisions, and professional judgment stay with the carrier team.</p>
+      </details>
+      <details>
+        <summary>Where does it fit in the workflow?</summary>
+        <p>At the beginning: after claim information is received and before it moves into review, routing, or the carrier's downstream claim process.</p>
+      </details>
+    </div>
+  </div>
+</section>
+
+<!-- REQUEST A DEMO -->
+<section id="demo" class="contact dark">
+  <div class="container contact-grid">
+    <div>
+      <span class="eyebrow">Request a demo</span>
+      <h2>See what structured intake could look like for your team.</h2>
+      <p>Send your company name and a preferred time for a focused product demonstration.</p>
+      <a class="contact-email" id="contactEmailLink" href="#"></a>
+      <p style="font-size:13px">Please don't include confidential claim or medical information.</p>
+    </div>
+
+    <form id="contactForm" novalidate>
+      <input class="hp" type="text" name="website" id="hp" tabindex="-1" autocomplete="off" aria-hidden="true">
+      <div class="row-2">
+        <div class="field">
+          <label for="cName">Full name <span class="req" aria-hidden="true">*</span></label>
+          <input id="cName" name="name" autocomplete="name" maxlength="100" aria-describedby="cNameErr">
+          <div class="field-meta"><span id="cNameErr" class="field-error"></span></div>
+        </div>
+        <div class="field">
+          <label for="cEmail">Work email <span class="req" aria-hidden="true">*</span></label>
+          <input id="cEmail" name="email" type="email" autocomplete="email" maxlength="254" aria-describedby="cEmailErr">
+          <div class="field-meta"><span id="cEmailErr" class="field-error"></span></div>
+        </div>
+      </div>
+      <div class="row-2">
+        <div class="field">
+          <label for="cCompany">Company name <span class="req" aria-hidden="true">*</span></label>
+          <input id="cCompany" name="company" autocomplete="organization" maxlength="120" aria-describedby="cCompanyErr">
+          <div class="field-meta"><span id="cCompanyErr" class="field-error"></span></div>
+        </div>
+        <div class="field">
+          <label for="cPhone">Phone <span style="color:var(--muted);font-weight:500">(optional)</span></label>
+          <input id="cPhone" name="phone" type="tel" autocomplete="tel" maxlength="25" aria-describedby="cPhoneErr">
+          <div class="field-meta"><span id="cPhoneErr" class="field-error"></span></div>
+        </div>
+      </div>
+      <div class="field">
+        <label for="cTime">Preferred demo time <span class="req" aria-hidden="true">*</span></label>
+        <input id="cTime" name="time" maxlength="120" placeholder="e.g. Tuesdays after 2pm ET" aria-describedby="cTimeErr">
+        <div class="field-meta"><span id="cTimeErr" class="field-error"></span></div>
+      </div>
+      <div class="field">
+        <label for="cMsg">Anything else? <span style="color:var(--muted);font-weight:500">(optional)</span></label>
+        <textarea id="cMsg" name="message" maxlength="2000" style="min-height:100px" aria-describedby="cMsgErr"></textarea>
+        <div class="field-meta"><span id="cMsgErr" class="field-error"></span></div>
+      </div>
+      <div class="form-actions">
+        <button type="submit" class="btn btn-primary">Compose in Gmail ↗</button>
+        <button type="button" class="btn btn-outline" id="mailtoBtn">Use my email app</button>
+        <button type="button" class="btn btn-outline" id="copyReqBtn">Copy request</button>
+      </div>
+      <div id="contactAlert" class="alert" role="alert"></div>
+    </form>
+  </div>
+</section>
+</main>
+
+<footer>
+  <div class="container foot">
+    <span>© <span id="year"></span> FirstNotice · AI-assisted insurance claims intake</span>
+    <a id="footerEmail" href="#"></a>
+  </div>
+</footer>
+
+<script>
+/* ============================================================
+   CONFIG — edit these two values before publishing
+   ============================================================ */
+const IS_LOCAL = ["localhost", "127.0.0.1"].includes(location.hostname);
+const CONFIG = {
+  // Opened from your own computer -> talks to the backend on your computer.
+  // Published online -> talks to your deployed backend (no trailing slash),
+  // e.g. "https://firstnotice-api.onrender.com"
+  API_BASE: IS_LOCAL ? "http://localhost:8000" : "https://claimpilot-website-1.onrender.com",
+  // Where demo requests should go
+  CONTACT_EMAIL: "you@yourcompany.com",
+  REQUEST_TIMEOUT_MS: 45000,
+  MIN_CLAIM_CHARS: 10,
+  MAX_CLAIM_CHARS: 10000
+};
+
+(function () {
+  "use strict";
+  const $ = (id) => document.getElementById(id);
+  const apiConfigured = () => /^https:\/\/(?!YOUR-API-HOST)/i.test(CONFIG.API_BASE) ||
+                              /^http:\/\/(localhost|127\.0\.0\.1)/i.test(CONFIG.API_BASE);
+
+  $("year").textContent = new Date().getFullYear();
+  [$("contactEmailLink"), $("footerEmail")].forEach((a) => {
+    a.textContent = CONFIG.CONTACT_EMAIL;
+    a.href = "mailto:" + CONFIG.CONTACT_EMAIL;
+  });
+
+  /* ---------- shared helpers ---------- */
+  function showAlert(el, type, msg) {
+    el.className = "alert show " + type;
+    el.textContent = msg;
+  }
+  function hideAlert(el) { el.className = "alert"; el.textContent = ""; }
+  function setFieldError(input, errEl, msg) {
+    input.setAttribute("aria-invalid", msg ? "true" : "false");
+    errEl.textContent = msg || "";
+    return !msg;
+  }
+  async function copyText(text) {
+    try {
+      if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(text);
+        return true;
+      }
+    } catch (_) { /* fall through */ }
+    try {
+      const ta = document.createElement("textarea");
+      ta.value = text; ta.setAttribute("readonly", "");
+      ta.style.position = "fixed"; ta.style.opacity = "0";
+      document.body.appendChild(ta); ta.select();
+      const ok = document.execCommand("copy");
+      document.body.removeChild(ta);
+      return ok;
+    } catch (_) { return false; }
+  }
+
+  /* ============================================================
+     LIVE DEMO — validation + call to POST /intake
+     ============================================================ */
+  const form = $("intakeForm"), claim = $("claimText"), claimErr = $("claimError"),
+        counter = $("claimCount"), btn = $("analyzeBtn"), alertEl = $("demoAlert"),
+        panel = $("resultPanel"), empty = $("resultEmpty"), skel = $("resultSkeleton"),
+        body = $("resultBody"), foot = $("resultFoot"), meta = $("resultMeta"), pill = $("resultPill");
+  let inFlight = null;
+
+  // Patterns that suggest real personal data was pasted in
+  const SENSITIVE = [
+    { re: /\b\d{3}-?\d{2}-?\d{4}\b/, label: "a Social Security number" },
+    { re: /\b(?:\d[ -]?){13,16}\b/, label: "a card or account number" },
+    { re: /\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b/i, label: "an email address" }
+  ];
+
+  function validateClaim(showEmpty) {
+    const raw = claim.value;
+    const v = raw.trim();
+    if (!v) return setFieldError(claim, claimErr, showEmpty ? "Please enter a claim description." : "");
+    if (v.length < CONFIG.MIN_CLAIM_CHARS)
+      return setFieldError(claim, claimErr, `Add a bit more detail (at least ${CONFIG.MIN_CLAIM_CHARS} characters).`);
+    if (raw.length > CONFIG.MAX_CLAIM_CHARS)
+      return setFieldError(claim, claimErr, `Too long — keep it under ${CONFIG.MAX_CLAIM_CHARS.toLocaleString()} characters.`);
+    if (!/[a-z]{2,}/i.test(v))
+      return setFieldError(claim, claimErr, "That doesn't look like a written description. Please use words.");
+    const hit = SENSITIVE.find((s) => s.re.test(v));
+    if (hit)
+      return setFieldError(claim, claimErr, `This looks like it contains ${hit.label}. Remove it — use fictional details only.`);
+    return setFieldError(claim, claimErr, "");
+  }
+
+  function updateCounter() {
+    const n = claim.value.length;
+    counter.textContent = `${n.toLocaleString()} / ${CONFIG.MAX_CLAIM_CHARS.toLocaleString()}`;
+    counter.classList.toggle("over", n > CONFIG.MAX_CLAIM_CHARS);
+  }
+
+  claim.addEventListener("input", () => {
+    updateCounter();
+    if (claim.getAttribute("aria-invalid") === "true") validateClaim(false);
+  });
+  claim.addEventListener("blur", () => validateClaim(false));
+
+  document.querySelectorAll("[data-sample]").forEach((chip) =>
+    chip.addEventListener("click", () => {
+      claim.value = chip.dataset.sample;
+      updateCounter(); validateClaim(false); hideAlert(alertEl); claim.focus();
+    })
+  );
+
+  $("clearBtn").addEventListener("click", () => {
+    if (inFlight) inFlight.abort();
+    claim.value = ""; updateCounter(); setFieldError(claim, claimErr, "");
+    hideAlert(alertEl); renderState("empty"); claim.focus();
+  });
+
+  function renderState(state, text) {
+    panel.setAttribute("aria-busy", state === "loading" ? "true" : "false");
+    empty.style.display = state === "empty" ? "block" : "none";
+    skel.classList.toggle("show", state === "loading");
+    body.classList.toggle("show", state === "result");
+    foot.style.display = state === "result" ? "flex" : "none";
+    pill.style.display = state === "result" ? "inline-flex" : "none";
+    if (state === "result") body.textContent = text; // textContent: never inject AI output as HTML
+  }
+
+  function setLoading(on) {
+    btn.disabled = on;
+    btn.classList.toggle("loading", on);
+    btn.querySelector(".label").textContent = on ? "Structuring…" : "Structure this claim →";
+    claim.readOnly = on;
+  }
+
+  // Turn any backend error body into one readable sentence
+  function messageFromError(status, data) {
+    let detail = data && data.detail;
+    if (Array.isArray(detail)) { // FastAPI 422 validation list
+      detail = detail.map((d) => (d && d.msg ? String(d.msg).replace(/^Value error, /, "") : "")).filter(Boolean).join(" ");
+    }
+    if (typeof detail === "string" && detail.trim()) return detail.trim();
+    const fallback = {
+      400: "The request was invalid. Check the description and try again.",
+      404: "The demo service endpoint wasn't found. Check the API address in the site settings.",
+      413: "The description is too large to process.",
+      422: "The description didn't pass validation. Please revise it.",
+      429: "The service is busy right now. Please wait a moment and try again.",
+      500: "Something went wrong on our side. Please try again later.",
+      502: "The AI service is temporarily unavailable. Please try again.",
+      503: "The demo service is starting up or unavailable. Try again in a minute.",
+      504: "The analysis took too long. Please try again."
+    };
+    return fallback[status] || `Unexpected error (HTTP ${status}). Please try again.`;
+  }
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    hideAlert(alertEl);
+    if (inFlight) return; // prevent double submit
+
+    if (!validateClaim(true)) { claim.focus(); return; }
+
+    if (!apiConfigured()) {
+      showAlert(alertEl, "info", "The live AI demo isn't connected yet. Set API_BASE at the bottom of index.html to your deployed backend URL.");
+      return;
+    }
+
+    const controller = new AbortController();
+    inFlight = controller;
+    const timer = setTimeout(() => controller.abort("timeout"), CONFIG.REQUEST_TIMEOUT_MS);
+    const started = performance.now();
+    setLoading(true); renderState("loading");
+
+    try {
+      const res = await fetch(CONFIG.API_BASE.replace(/\/+$/, "") + "/intake", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Accept": "application/json" },
+        body: JSON.stringify({ description: claim.value.trim() }),
+        signal: controller.signal
+      });
+
+      let data = null;
+      const ct = res.headers.get("content-type") || "";
+      if (ct.includes("application/json")) {
+        try { data = await res.json(); } catch (_) { data = null; }
+      }
+
+      if (!res.ok) throw { userMessage: messageFromError(res.status, data) };
+
+      if (!data || typeof data.ai_result !== "string" || !data.ai_result.trim())
+        throw { userMessage: "The service responded, but no summary came back. Please try again." };
+
+      const secs = ((performance.now() - started) / 1000).toFixed(1);
+      renderState("result", data.ai_result.trim());
+      meta.textContent = `Generated in ${secs}s · AI output — verify before use`;
+      showAlert(alertEl, "success", "Claim structured. Review the result before relying on it.");
+    } catch (err) {
+      renderState("empty");
+      let msg;
+      if (err && err.userMessage) msg = err.userMessage;
+      else if (err && err.name === "AbortError")
+        msg = controller.signal.reason === "timeout"
+          ? "The request timed out. The service may be waking up — please try again."
+          : "Request cancelled.";
+      else if (!navigator.onLine) msg = "You appear to be offline. Check your connection and try again.";
+      else msg = "Couldn't reach the demo service. It may be offline, or blocked by CORS settings.";
+      if (msg !== "Request cancelled.") showAlert(alertEl, "error", msg);
+      console.error("[FirstNotice demo]", err);
+    } finally {
+      clearTimeout(timer);
+      inFlight = null;
+      setLoading(false);
+    }
+  });
+
+  $("copyResultBtn").addEventListener("click", async (e) => {
+    const ok = await copyText(body.textContent);
+    e.currentTarget.textContent = ok ? "Copied ✓" : "Copy failed";
+    setTimeout(() => (e.currentTarget.textContent = "Copy"), 1800);
+  });
+
+  updateCounter();
+
+  /* ============================================================
+     DOCUMENT UPLOAD — validation + POST /claims/{id}/documents
+     ============================================================ */
+  const UP = {
+    MAX_BYTES: 10 * 1024 * 1024,
+    MAX_FILES: 5,
+    TIMEOUT_MS: 60000,
+    TYPES: {
+      "image/jpeg": [".jpg", ".jpeg"],
+      "image/png": [".png"],
+      "image/webp": [".webp"],
+      "application/pdf": [".pdf"]
+    },
+    LABELS: { accident_photo: "Accident photo", police_report: "Police report", repair_estimate: "Repair estimate" }
+  };
+  const upForm = $("uploadForm"), claimIdEl = $("claimId"), claimIdErr = $("claimIdErr"),
+        catEl = $("docCategory"), catErr = $("docCategoryErr"), fileInput = $("docFiles"),
+        dropzone = $("dropzone"), filesErr = $("docFilesErr"), selectedList = $("selectedFiles"),
+        upBtn = $("uploadBtn"), upAlert = $("uploadAlert"), upResults = $("uploadResults"),
+        upEmpty = $("uploadEmpty");
+  let selected = [];
+  let uploading = false;
+
+  function makeClaimId() {
+    const d = new Date();
+    const ymd = d.getFullYear() + String(d.getMonth() + 1).padStart(2, "0") + String(d.getDate()).padStart(2, "0");
+    const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+    const rnd = new Uint8Array(6);
+    crypto.getRandomValues(rnd);
+    return "CLM-" + ymd + "-" + Array.from(rnd, (b) => chars[b % chars.length]).join("");
+  }
+  claimIdEl.value = makeClaimId();
+  $("newClaimIdBtn").addEventListener("click", () => {
+    claimIdEl.value = makeClaimId(); setFieldError(claimIdEl, claimIdErr, "");
+  });
+
+  function validateClaimId() {
+    const v = claimIdEl.value.trim();
+    if (!v) return setFieldError(claimIdEl, claimIdErr, "Claim ID is required.");
+    if (v.length > 64) return setFieldError(claimIdEl, claimIdErr, "Keep it to 64 characters or fewer.");
+    if (!/^[A-Za-z0-9_-]+$/.test(v)) return setFieldError(claimIdEl, claimIdErr, "Use only letters, numbers, - and _.");
+    return setFieldError(claimIdEl, claimIdErr, "");
+  }
+  function validateCategory() {
+    return setFieldError(catEl, catErr, UP.LABELS[catEl.value] ? "" : "Choose a document type.");
+  }
+  claimIdEl.addEventListener("input", () => { if (claimIdEl.getAttribute("aria-invalid") === "true") validateClaimId(); });
+  catEl.addEventListener("change", validateCategory);
+
+  const fmtSize = (b) => b >= 1048576 ? (b / 1048576).toFixed(1) + " MB" : Math.max(1, Math.round(b / 1024)) + " KB";
+  const extOf = (name) => { const i = name.lastIndexOf("."); return i >= 0 ? name.slice(i).toLowerCase() : ""; };
+
+  // Same "magic number" checks the server does, so bad files fail fast
+  async function signatureOk(file) {
+    const h = new Uint8Array(await file.slice(0, 16).arrayBuffer());
+    const starts = (...bytes) => bytes.every((b, i) => h[i] === b);
+    switch (file.type) {
+      case "image/jpeg": return starts(0xff, 0xd8, 0xff);
+      case "image/png": return starts(0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a);
+      case "image/webp": return starts(0x52, 0x49, 0x46, 0x46) && h[8] === 0x57 && h[9] === 0x45 && h[10] === 0x42 && h[11] === 0x50;
+      case "application/pdf": return starts(0x25, 0x50, 0x44, 0x46, 0x2d);
+      default: return false;
+    }
+  }
+  async function checkFile(file) {
+    const exts = UP.TYPES[file.type];
+    if (!exts || !exts.includes(extOf(file.name))) return "not a JPG, PNG, WebP, or PDF";
+    if (file.size === 0) return "file is empty";
+    if (file.size > UP.MAX_BYTES) return "larger than 10 MB";
+    try { if (!(await signatureOk(file))) return "contents don't match its file type"; }
+    catch (_) { return "couldn't be read"; }
+    return "";
+  }
+
+  function renderSelected() {
+    selectedList.innerHTML = "";
+    selected.forEach((f, i) => {
+      const li = document.createElement("li");
+      const span = document.createElement("span");
+      span.textContent = `${f.name} · ${fmtSize(f.size)}`;
+      const rm = document.createElement("button");
+      rm.type = "button"; rm.className = "remove-file"; rm.textContent = "×";
+      rm.setAttribute("aria-label", "Remove " + f.name);
+      rm.addEventListener("click", () => { selected.splice(i, 1); renderSelected(); });
+      li.append(span, rm);
+      selectedList.appendChild(li);
+    });
+    if (selected.length) { dropzone.removeAttribute("aria-invalid"); }
+  }
+
+  async function addFiles(list) {
+    if (uploading) return;
+    const problems = [];
+    for (const file of Array.from(list)) {
+      if (selected.some((f) => f.name === file.name && f.size === file.size)) continue;
+      if (selected.length >= UP.MAX_FILES) { problems.push(`Only ${UP.MAX_FILES} files at a time — ${file.name} was skipped.`); continue; }
+      const why = await checkFile(file);
+      if (why) problems.push(`${file.name}: ${why}.`); else selected.push(file);
+    }
+    filesErr.textContent = problems.join(" ");
+    renderSelected();
+  }
+
+  dropzone.addEventListener("click", () => fileInput.click());
+  dropzone.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" || e.key === " ") { e.preventDefault(); fileInput.click(); }
+  });
+  fileInput.addEventListener("change", async () => { await addFiles(fileInput.files); fileInput.value = ""; });
+  ["dragenter", "dragover"].forEach((t) => dropzone.addEventListener(t, (e) => { e.preventDefault(); dropzone.classList.add("drag"); }));
+  ["dragleave", "drop"].forEach((t) => dropzone.addEventListener(t, (e) => { e.preventDefault(); dropzone.classList.remove("drag"); }));
+  dropzone.addEventListener("drop", (e) => { if (e.dataTransfer) addFiles(e.dataTransfer.files); });
+
+  $("clearFilesBtn").addEventListener("click", () => {
+    if (uploading) return;
+    selected = []; renderSelected(); filesErr.textContent = ""; hideAlert(upAlert);
+  });
+
+  function addResultRow(file) {
+    upEmpty.style.display = "none";
+    const li = document.createElement("li");
+    li.className = "file-item";
+    const info = document.createElement("div");
+    const name = document.createElement("div"); name.className = "name"; name.textContent = file.name;
+    const sub = document.createElement("div"); sub.className = "sub"; sub.textContent = fmtSize(file.size);
+    info.append(name, sub);
+    const badge = document.createElement("span"); badge.className = "status wait"; badge.textContent = "Waiting";
+    li.append(info, badge);
+    upResults.prepend(li);
+    return {
+      set(state, label, detail) {
+        badge.className = "status " + state; badge.textContent = label;
+        if (detail) sub.textContent = detail;
+      }
+    };
+  }
+
+  function setUploading(on) {
+    uploading = on;
+    upBtn.disabled = on;
+    upBtn.classList.toggle("loading", on);
+    upBtn.querySelector(".label").textContent = on ? "Uploading…" : "Upload documents ↑";
+    [claimIdEl, catEl, $("newClaimIdBtn"), $("clearFilesBtn")].forEach((el) => (el.disabled = on));
+  }
+
+  async function uploadOne(claimId, category, file) {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), UP.TIMEOUT_MS);
+    const body = new FormData();
+    body.append("category", category);
+    body.append("file", file, file.name);
+    try {
+      const res = await fetch(`${CONFIG.API_BASE.replace(/\/+$/, "")}/claims/${encodeURIComponent(claimId)}/documents`, {
+        method: "POST", body, signal: controller.signal
+      });
+      let data = null;
+      try { data = await res.json(); } catch (_) { /* non-JSON */ }
+      if (res.ok && data && data.file_id) return { ok: true, data };
+      if (res.status === 404 && !(data && typeof data.detail === "string" && data.detail !== "Not Found"))
+        return { ok: false, status: 404, msg: "Upload service not found — uploads may be turned off on the server (UPLOADS_ENABLED)." };
+      return { ok: false, status: res.status, msg: res.ok ? "Unexpected response from the server." : messageFromError(res.status, data) };
+    } catch (err) {
+      if (err && err.name === "AbortError") return { ok: false, status: 0, msg: "Upload timed out. Try again." };
+      return { ok: false, status: 0, msg: navigator.onLine ? "Couldn't reach the server — is the backend running?" : "You appear to be offline." };
+    } finally {
+      clearTimeout(timer);
+    }
+  }
+
+  upForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    if (uploading) return;
+    hideAlert(upAlert);
+    const okId = validateClaimId(), okCat = validateCategory();
+    if (!selected.length) { dropzone.setAttribute("aria-invalid", "true"); filesErr.textContent = "Choose at least one file."; }
+    if (!okId) { claimIdEl.focus(); return; }
+    if (!okCat) { catEl.focus(); return; }
+    if (!selected.length) { dropzone.focus(); return; }
+    if (!apiConfigured()) {
+      showAlert(upAlert, "info", "Uploads aren't connected yet. Set API_BASE in index.html to your deployed backend URL.");
+      return;
+    }
+
+    const claimId = claimIdEl.value.trim(), category = catEl.value;
+    const queue = selected.slice();
+    const rows = queue.map(addResultRow);
+    let done = 0, stopped = false;
+    setUploading(true);
+    for (let i = 0; i < queue.length; i++) {
+      if (stopped) { rows[i].set("err", "Skipped", "Not sent — try again in a minute."); continue; }
+      rows[i].set("wait", "Uploading…");
+      const r = await uploadOne(claimId, category, queue[i]);
+      if (r.ok) {
+        done++;
+        selected = selected.filter((f) => f !== queue[i]);
+        rows[i].set("ok", "Uploaded", `${UP.LABELS[category]} · ${fmtSize(r.data.size_bytes)} · claim ${r.data.claim_id} · ID ${r.data.file_id.slice(0, 8)}…`);
+      } else {
+        rows[i].set("err", "Failed", r.msg);
+        if (r.status === 429 || r.status === 404 || r.status === 0) stopped = true; // no point retrying the rest now
+      }
+    }
+    setUploading(false);
+    renderSelected();
+    const total = queue.length;
+    if (done === total) showAlert(upAlert, "success", `${done} of ${total} uploaded to claim ${claimId}.`);
+    else if (done) showAlert(upAlert, "error", `${done} of ${total} uploaded. See the results for what failed.`);
+    else showAlert(upAlert, "error", "Nothing was uploaded. See the results for details.");
+  });
+
+  /* ============================================================
+     DEMO REQUEST FORM — validation + Gmail / mailto / copy
+     ============================================================ */
+  const cForm = $("contactForm"), cAlert = $("contactAlert");
+  const fields = {
+    name:    { el: $("cName"),    err: $("cNameErr") },
+    email:   { el: $("cEmail"),   err: $("cEmailErr") },
+    company: { el: $("cCompany"), err: $("cCompanyErr") },
+    phone:   { el: $("cPhone"),   err: $("cPhoneErr") },
+    time:    { el: $("cTime"),    err: $("cTimeErr") },
+    message: { el: $("cMsg"),     err: $("cMsgErr") }
+  };
+  const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+  const PHONE_RE = /^[+()\-.\s\d]{7,25}$/;
+
+  const rules = {
+    name:    (v) => !v ? "Name is required." : v.length < 2 ? "Enter your full name." : /[<>]/.test(v) ? "Remove < and > characters." : "",
+    email:   (v) => !v ? "Email is required." : !EMAIL_RE.test(v) ? "Enter a valid email, like name@company.com." : "",
+    company: (v) => !v ? "Company name is required." : v.length < 2 ? "Enter your company name." : "",
+    phone:   (v) => !v ? "" : !PHONE_RE.test(v) || v.replace(/\D/g, "").length < 7 ? "Enter a valid phone number, or leave it blank." : "",
+    time:    (v) => !v ? "Let us know a preferred time." : "",
+    message: (v) => v.length > 2000 ? "Keep the message under 2,000 characters." : ""
+  };
+
+  function validateField(key) {
+    const f = fields[key];
+    const v = f.el.value.trim();
+    return setFieldError(f.el, f.err, rules[key](v));
+  }
+  function validateAll() {
+    let firstBad = null;
+    Object.keys(fields).forEach((k) => { if (!validateField(k) && !firstBad) firstBad = fields[k].el; });
+    if (firstBad) firstBad.focus();
+    return !firstBad;
+  }
+  Object.keys(fields).forEach((k) => {
+    fields[k].el.addEventListener("blur", () => { if (fields[k].el.value.trim()) validateField(k); });
+    fields[k].el.addEventListener("input", () => { if (fields[k].el.getAttribute("aria-invalid") === "true") validateField(k); });
+  });
+
+  function buildRequest() {
+    const g = (k) => fields[k].el.value.trim();
+    const subject = "FirstNotice demo request" + (g("company") ? " — " + g("company") : "");
+    const lines = [
+      "Hello,", "", "I'd like to request a FirstNotice demo.", "",
+      "Name: " + g("name"),
+      "Email: " + g("email"),
+      "Company name: " + g("company"),
+      "Preferred demo time: " + g("time"),
+      "Phone number: " + (g("phone") || "—")
+    ];
+    if (g("message")) lines.push("", "Notes:", g("message"));
+    lines.push("", "Thank you.");
+    return { subject, body: lines.join("\n") };
+  }
+
+  function guard() {
+    hideAlert(cAlert);
+    if ($("hp").value) return false; // bot filled the honeypot
+    if (!validateAll()) {
+      showAlert(cAlert, "error", "Please fix the highlighted fields.");
+      return false;
+    }
+    if (!EMAIL_RE.test(CONFIG.CONTACT_EMAIL) || CONFIG.CONTACT_EMAIL === "you@yourcompany.com") {
+      showAlert(cAlert, "info", "The site owner hasn't set a contact email yet (CONTACT_EMAIL in index.html).");
+      return false;
+    }
+    return true;
+  }
+
+  cForm.addEventListener("submit", (e) => {
+    e.preventDefault();
+    if (!guard()) return;
+    const r = buildRequest();
+    const url = "https://mail.google.com/mail/?view=cm&fs=1" +
+      "&to=" + encodeURIComponent(CONFIG.CONTACT_EMAIL) +
+      "&su=" + encodeURIComponent(r.subject) +
+      "&body=" + encodeURIComponent(r.body);
+    const win = window.open(url, "_blank", "noopener");
+    if (!win) showAlert(cAlert, "info", "Your browser blocked the pop-up. Use “Use my email app” or “Copy request” instead.");
+    else showAlert(cAlert, "success", "Gmail opened in a new tab — just hit Send.");
+  });
+
+  $("mailtoBtn").addEventListener("click", () => {
+    if (!guard()) return;
+    const r = buildRequest();
+    window.location.href = "mailto:" + CONFIG.CONTACT_EMAIL +
+      "?subject=" + encodeURIComponent(r.subject) + "&body=" + encodeURIComponent(r.body);
+    showAlert(cAlert, "success", "Opening your email app. If nothing happens, use “Copy request”.");
+  });
+
+  $("copyReqBtn").addEventListener("click", async () => {
+    if (!guard()) return;
+    const r = buildRequest();
+    const ok = await copyText(`To: ${CONFIG.CONTACT_EMAIL}\nSubject: ${r.subject}\n\n${r.body}`);
+    showAlert(cAlert, ok ? "success" : "error",
+      ok ? "Request copied — paste it into any email and send." : "Couldn't copy automatically. Please select and copy manually.");
+  });
+})();
+</script>
+</body>
+</html>
